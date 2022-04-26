@@ -1,0 +1,106 @@
+---
+title: "portfolio-9"
+author: "Elayna Seago"
+date: "4/26/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r libraries}
+library(tidyverse)
+library(lubridate)
+library(tidytext)
+library(topicmodels)
+library(wordcloud2)
+library(readr)
+library(janitor)
+library(reshape2)
+library(devtools)
+```
+
+```{r}
+netflix_titles <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-04-20/netflix_titles.csv')
+```
+
+```{r}
+netflix_titles
+```
+
+```{r}
+removed_words <- c("and", "the", "in", "of", "a", "for", "to", "with" , "my" , "on" , "we" , "is" , "or" , "2")
+
+netflix_titles_table <- netflix_titles %>%
+   unnest_tokens(word, title) %>%
+  filter(!word %in% removed_words) %>%
+  group_by(country , word) %>%
+  summarize(n = n()) %>%
+  ungroup() 
+netflix_titles_table
+
+
+```
+
+
+```{r}
+netflix_titles_table_2 <- netflix_titles_table %>%
+  select(word, n) %>%
+  top_n(100, n)
+
+wordcloud2(netflix_titles_table_2)
+```
+
+
+```{r}
+netflix_titles_table_USA <- netflix_titles_table %>%
+  select(word, n, country) %>%
+  filter(country == "United States") %>%
+  top_n(100, n)
+
+wordcloud2(netflix_titles_table_USA)
+```
+
+
+```{r}
+removed_words_rating <- c("and", "the", "in", "of", "a", "for", "to", "with" , "my" , "on" , "we" , "is" , "or" , "2" , "an" , "all" , "at")
+
+netflix_titles_table_rating <- netflix_titles %>%
+   unnest_tokens(word, title) %>%
+  filter(!word %in% removed_words_rating) %>%
+  group_by(rating , word) %>%
+  summarize(n = n()) %>%
+  ungroup() 
+netflix_titles_table_rating
+```
+
+```{r}
+netflix_titles_table_rating_G <- netflix_titles_table_rating %>%
+  select(word, n, rating) %>%
+  filter(rating == "G") %>%
+  top_n(100, n)
+
+wordcloud2(netflix_titles_table_rating_G)
+
+netflix_titles_table_rating_PG <- netflix_titles_table_rating %>%
+  select(word, n, rating) %>%
+  filter(rating == "PG") %>%
+  top_n(100, n)
+
+wordcloud2(netflix_titles_table_rating_PG)
+
+netflix_titles_table_rating_R <- netflix_titles_table_rating %>%
+  select(word, n, rating) %>%
+  filter(rating == "R") %>%
+  top_n(100, n)
+
+wordcloud2(netflix_titles_table_rating_R)
+```
+
